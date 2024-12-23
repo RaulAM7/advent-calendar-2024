@@ -1,0 +1,294 @@
+<html><head><base href="/" />
+    <title>Digital Advent Calendar</title>
+    <style>
+    :root {
+      --calendar-bg: #2c3e50;
+      --door-bg: #c0392b;
+      --door-hover: #e74c3c;
+      --text-color: #ecf0f1;
+    }
+    
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--calendar-bg);
+      font-family: 'Mountains of Christmas', cursive;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* Added this line for vertical centering */
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    .red-container {
+      background: #c0392b;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      margin: 20px;
+      background-image: url('https://media.istockphoto.com/id/1049368588/photo/cheerful-funny-trendy-stylish-fashionable-strong-sporty-virile-muscular-santa-in-eyeglasses.jpg?s=612x612&w=0&k=20&c=Xf5Bni38HRRoag-CGrtX5bA3fHX_H6n8dGT2ax9Meic=');
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .snowfall {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .calendar-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      padding: 30px;
+      max-width: 1000px;
+      width: 90%;
+      margin: 20px auto;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .door {
+      aspect-ratio: 1;
+      position: relative;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+      min-height: 150px;
+    }
+    
+    .door-front, .door-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .door-front {
+      background: rgba(192, 57, 43, 0.3);
+      color: var(--text-color);
+      font-size: 2.5em;
+      transform: rotateY(0deg);
+      backdrop-filter: blur(5px);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    
+    .door-back {
+      background: #27ae60;
+      transform: rotateY(180deg);
+      font-size: 3em;
+    }
+    
+    .door.opened {
+      transform: rotateY(180deg);
+    }
+    
+    .door:not(.available) {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .door:hover:not(.opened):not(.available) {
+      animation: shake 0.5s ease-in-out;
+    }
+    
+    .door.available:hover .door-front {
+      background: rgba(231, 76, 60, 0.4);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 80%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      animation: modalPop 0.3s ease-out;
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    
+    @keyframes modalPop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes snowfall {
+      0% { transform: translateY(-10vh) translateX(0); }
+      100% { transform: translateY(100vh) translateX(20px); }
+    }
+    
+    .snowflake {
+      position: absolute;
+      color: white;
+      font-size: 1em;
+      animation: snowfall linear infinite;
+    }
+    
+    @media (max-width: 600px) {
+      .calendar-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        padding: 15px;
+      }
+      
+      .door {
+        min-height: 100px;
+      }
+    }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
+    </head>
+    <body>
+    
+    <h1 style="color: var(--text-color); text-align: center; margin: 20px;">FIT Advent Calendar 2024</h1>
+    <div class="snowfall" id="snowfall"></div>
+    <div class="red-container">
+      <div class="calendar-container" id="calendar"></div>
+    </div>
+    <div class="modal" id="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div id="modal-text"></div>
+      </div>
+    </div>
+    
+    <script>
+    const messages = [
+      "40 sentadillas",
+      "90 segundos de plancha",
+      "24 saltos de estrella",
+      "16 flexiones de brazos",
+      "45 segundos de burpees",
+      "16 abdominales con elevación de piernas",
+      "16 zancadas por pierna",
+      "24 repeticiones de glúteos puente con una pierna elevada",
+      "70 segundos de wall sit",
+      "32 pasos de marcha alta",
+      "12 fondos de tríceps en una silla",
+      "45 segundos de saltar la cuerda (real o imaginaria)",
+      "24 mountain climbers",
+      "16 giros rusos con peso (puede ser una botella de agua)",
+      "16 patadas traseras por pierna en posición de perro hacia abajo",
+      "45 segundos de burpees rápidos",
+      "16 saltos a una pierna alternada",
+      "8 flexiones tipo diamante",
+      "45 segundos de jumping lunges (zancadas con salto)",
+      "24 pasos de oso (bear crawl)",
+      "16 desplantes laterales (8 por lado)",
+      "12 burpees con salto extra al final",
+      "45 segundos de plancha con giros de cadera",
+      "8 burpees con flexión y salto alto"
+    ];
+    
+    function createCalendar() {
+      const calendar = document.getElementById('calendar');
+      const currentDate = new Date();
+      const currentDay = currentDate.getDate();
+      const currentMonth = currentDate.getMonth();
+    
+      for (let i = 1; i <= 24; i++) {
+        const door = document.createElement('div');
+        door.className = `door ${(currentMonth === 11 && i <= currentDay) ? 'available' : ''}`;
+        
+        const front = document.createElement('div');
+        front.className = 'door-front';
+        front.textContent = i;
+    
+        const back = document.createElement('div');
+        back.className = 'door-back';
+        back.innerHTML = '🎄';
+    
+        door.appendChild(front);
+        door.appendChild(back);
+    
+        door.addEventListener('click', () => {
+          if (door.classList.contains('available') && !door.classList.contains('opened')) {
+            door.classList.add('opened');
+            showModal(messages[i-1]);
+          }
+        });
+    
+        calendar.appendChild(door);
+      }
+    }
+    
+    function showModal(message) {
+      const modal = document.getElementById('modal');
+      const modalText = document.getElementById('modal-text');
+      modalText.innerHTML = `
+        <h2 style="color: #2c3e50; text-align: center;">${message}</h2>
+        <div style="text-align: center; margin-top: 20px; font-size: 50px;">
+          💪
+        </div>
+      `;
+      modal.style.display = 'flex';
+    }
+    
+    function createSnowfall() {
+      const snowfall = document.getElementById('snowfall');
+      const snowflakes = '❄️❅❆';
+      
+      for (let i = 0; i < 50; i++) {
+        const snowflake = document.createElement('span');
+        snowflake.className = 'snowflake';
+        snowflake.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+        snowflake.style.left = Math.random() * 100 + 'vw';
+        snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        snowflake.style.opacity = Math.random();
+        snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+        snowfall.appendChild(snowflake);
+      }
+    }
+    
+    document.querySelector('.close-modal').addEventListener('click', () => {
+      document.getElementById('modal').style.display = 'none';
+    });
+    
+    window.addEventListener('click', (e) => {
+      const modal = document.getElementById('modal');
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+    
+    createCalendar();
+    createSnowfall();
+    </script>
+    </body></html>
