@@ -1,14 +1,14 @@
 const bGround = require('fcc-express-bground');
 // Nos importamos los routers
-const jsfile1 = require('./route-parameters');
-const jsfile2 = require('./query-parameters');
+const jsfile1 = require('./advent-calendar-router');
+
 // Montamos el objeto app express del server
 const express = require('express');
 const app = express();
 
 // Configuramos los routers
 app.use(jsfile1);
-app.use(jsfile2);
+
 
 if (!process.env.DISABLE_XORIGIN) {
   app.use((req, res, next) => {
