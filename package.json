@@ -1,0 +1,25 @@
+{
+  "name": "advent-calendar-2024",
+  "version": "1.0.0",
+  "description": "",
+  "main": "advent-calendar-router.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RaulAM7/advent-calendar-2024.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RaulAM7/advent-calendar-2024/issues"
+  },
+  "homepage": "https://github.com/RaulAM7/advent-calendar-2024#readme",
+  "dependencies": {
+    "express": "^4.21.2",
+    "fcc-express-bground": "^0.0.5"
+  }
+}
